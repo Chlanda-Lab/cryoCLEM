@@ -13,7 +13,7 @@
 
     <groupId>de.chlandalab</groupId>
     <artifactId>cryoCLEM</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
 
     <name>CryoCLEM image stitching and other utilities</name>
     <description>A helper plugin for CryoCLEM workflows</description>
@@ -40,7 +40,7 @@
     </developers>
     <contributors>
         <contributor>
-            <name>None</name>
+            <name>Steffen Klein</name>
         </contributor>
     </contributors>
 
@@ -62,7 +62,7 @@
         <package-name>de.chlandalab.cryoCLEM.plugin</package-name>
         <main-class>StitchTileScan</main-class>
         <license.licenseName>GPL-2.0</license.licenseName>
-        <license.copyrightOwners>Moritz Wachsmuth-Melm</license.copyrightOwners>
+        <license.copyrightOwners>AG Chlanda</license.copyrightOwners>
         <license.projectName>ImageJ software for multidimensional image processing and analysis.</license.projectName>
     </properties>
 
@@ -128,7 +128,7 @@
                         <configuration>
                             <rules>
                                 <requireJavaVersion>
-                                    <version>14.0.2</version>
+                                    <version>*</version>
                                 </requireJavaVersion>
                             </rules>
                         </configuration>
@@ -137,7 +137,7 @@
                 <configuration>
                     <rules>
                         <requireJavaVersion>
-                            <version>14.0.2</version>
+                            <version>*</version>
                         </requireJavaVersion>
                     </rules>
                 </configuration>
