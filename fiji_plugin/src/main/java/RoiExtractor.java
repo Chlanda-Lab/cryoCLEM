@@ -73,7 +73,15 @@ public class RoiExtractor implements Command {
 
                                                   @Override
                                                   public void mouseClicked(MouseEvent mouseEvent) {
-                                                      for (Roi roi : rm.getSelectedRoisAsArray()) {
+                                                      final Roi[] rois = rm.getSelectedRoisAsArray();
+                                                      /* Fix for issue #1:
+                                                      * If you click anywhere but a ROI number, no ROI is selected.
+                                                      * Then, getSelectedRoisAsArray() returns all ROIs, and all
+                                                      * ROIs would then be exported. We don't want that.
+                                                       */
+                                                      if (rois != null && rois.length != 1)
+                                                          return;
+                                                      for (Roi roi : rois) {
                                                           Matcher matcher = series_num_regex.matcher(roi.getName());
                                                           if (matcher.find()) {
                                                               final int series_index = Integer.parseInt(matcher.group(0));
