@@ -21,10 +21,10 @@ tic;
 % SET ALL NECCESARY VARIABLES HERE
 
 % Set filenames of fixed and moving image
-% image_before_milling: path to the image stack before milling / EM acquisition -> fixed image
-image_before_milling = 'stack_after_milling.tif';
-% image_after_milling: path to the image stack after milling / EM acquisition -> moving image
-image_after_milling = 'stack_before_milling.tif';
+% pre_LM_stack: path to the image stack before milling / EM acquisition -> fixed image
+pre_LM_stack = 'stack_before_milling.tif';
+% post_LM_stack: path to the image stack after milling / EM acquisition -> moving image
+post_LM_stack = 'stack_after_milling.tif';
 
 % Set channel information
 % channels: total number of channels in tif file
@@ -43,13 +43,13 @@ z_resUM = 0.3;
 % DO NOT CHANGE ANYTHING BEYOND THIS POINT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Extract image dimensions from imported files
-[size_X_fixed, size_Y_fixed] = size(imread(image_before_milling));
-size_Z_fixed = (size(imfinfo(image_before_milling), 1) / channels);
+[size_X_fixed, size_Y_fixed] = size(imread(pre_LM_stack));
+size_Z_fixed = (size(imfinfo(pre_LM_stack), 1) / channels);
 size_fixed = [size_X_fixed, size_Y_fixed, size_Z_fixed];
 clear size_X_fixed size_Y_fixed size_Z_fixed;
 
-size_Z_moving = (size(imfinfo(image_after_milling), 1) / channels);
-[size_X_moving, size_Y_moving] = size(imread(image_after_milling));
+size_Z_moving = (size(imfinfo(post_LM_stack), 1) / channels);
+[size_X_moving, size_Y_moving] = size(imread(post_LM_stack));
 size_moving = [size_X_moving, size_Y_moving, size_Z_moving];
 clear size_X_moving size_Y_moving size_Z_moving;
 
@@ -64,7 +64,7 @@ fixed_image = init_cell(channels, size_fixed(1), size_fixed(2), size_fixed(3));
 k = 1;
 for i = 1:size_fixed(3)
     for j = 1:channels
-        fixed_image{j}(:, :, i) = imread(image_before_milling, k);
+        fixed_image{j}(:, :, i) = imread(pre_LM_stack, k);
         k = k + 1;
     end
 end
@@ -75,7 +75,7 @@ moving_image = init_cell(channels, size_moving(1), size_moving(2), size_moving(3
 k = 1;
 for i = 1:size_moving(3)
     for j = 1:channels
-        moving_image{j}(:, :, i) = imread(image_after_milling, k);
+        moving_image{j}(:, :, i) = imread(post_LM_stack, k);
         k = k + 1;
     end
 end
