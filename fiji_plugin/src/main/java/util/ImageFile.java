@@ -71,7 +71,7 @@ public class ImageFile extends File {
         return null;
     }
 
-    private static String remove_extension(final String path) {
+    public static String remove_extension(final String path) {
         final int last = path.lastIndexOf(".");
         return last >= 1 ? path.substring(0, last) : path;
     }
