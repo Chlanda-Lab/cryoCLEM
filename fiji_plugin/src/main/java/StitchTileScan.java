@@ -19,6 +19,7 @@ import org.scijava.log.LogLevel;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.thread.ThreadService;
 import util.*;
 
 import java.io.*;
@@ -32,13 +33,13 @@ import java.util.stream.Collectors;
 
 @Plugin(type = Command.class, menuPath = "Plugins>CryoCLEM>Stitch TileScan")
 public class StitchTileScan implements Command {
-    private final ExecutorService thread_pool = Executors.newFixedThreadPool(2);
+
     @Parameter
     private LogService log;
+    @Parameter
+    private ThreadService threadService;
     @Parameter(label = "LIF file(s)")
     private File[] files;
-    @Parameter(label = "File extension filter")
-    private String extension;
     @Parameter(label = "Create subfolder(s)")
     private boolean subfolder;
     @Parameter(label = "Write PNG export(s)")
@@ -47,19 +48,17 @@ public class StitchTileScan implements Command {
     @Override
     public void run() {
         log.setLevel(LogLevel.INFO);
-
         // Prepare all image files, filter out unwanted file extensions
         final ArrayList<ImageFile> image_files = new ArrayList<>();
         for (File f : files) {
-            if (f.getName().endsWith(extension)) {
-                try {
-                    log.debug("Starting read of image file:\n" + f.getPath());
-                    image_files.add(new ImageFile(f.getPath(), subfolder));
-                } catch (DependencyException | ServiceException | IOException | FormatException e) {
-                    log.debug("Failed reading image file:\n" + f.getPath());
-                    log.error(e.getMessage());
-                }
+            try {
+                log.debug("Starting read of image file:\n" + f.getPath());
+                image_files.add(new ImageFile(f.getPath(), subfolder));
+            } catch (DependencyException | ServiceException | IOException | FormatException e) {
+                log.debug("Failed reading image file:\n" + f.getPath());
+                log.error(e.getMessage());
             }
+
         }
 
         // Ask the user which series she/he would like to import
@@ -82,11 +81,10 @@ public class StitchTileScan implements Command {
                 try {
                     stitch.run();
                 } catch (ExecutionException e) {
-                    log.error(String.format("One job has failed!\nFile = [%s]\nutil.Series = [%s]\n%s", stitch.image_file.base_name, stitch.series_name));
+                    log.error(String.format("One job has failed!\nFile = [%s]\nutil.Series = [%s]\n", stitch.image_file.base_name, stitch.series_name));
                     for (StackTraceElement el : e.getStackTrace()) {
-                        log.error(String.format("$s:%s:%d",el.getClassName(), el.getMethodName(), el.getLineNumber()));
+                        log.error(String.format("$s:%s:%d", el.getClassName(), el.getMethodName(), el.getLineNumber()));
                     }
-                    continue;
                 } catch (InterruptedException e) {
                     log.error("Interrupted\n" + e.getMessage());
                     return;
@@ -112,8 +110,6 @@ public class StitchTileScan implements Command {
             this.max_projection_dir = new File(this.image_file.getParent() + File.separator + ".max_projections");
             this.tileconfig = new File(this.max_projection_dir.getAbsolutePath() + File.separator + "tileconfig_" + this.series_name + ".txt");
             this.channels = image_file.channels(series_name);
-            if (!this.max_projection_dir.exists())
-                this.max_projection_dir.mkdirs();
         }
 
         private void run() throws ExecutionException, InterruptedException, FileNotFoundException, UnsupportedEncodingException {
@@ -122,6 +118,9 @@ public class StitchTileScan implements Command {
                     this.series_name,
                     this.max_projection_dir,
                     this.tileconfig));
+
+            if (!this.max_projection_dir.exists())
+                this.max_projection_dir.mkdirs();
 
             log.debug("Creating job list");
             final List<Callable<MaxProjection>> jobs = image_file.series.stream()
@@ -139,7 +138,7 @@ public class StitchTileScan implements Command {
             log.debug("Writing tileconfig file to " + this.tileconfig);
             final PrintWriter writer = new PrintWriter(this.tileconfig, "UTF-8");
             writer.println("dim = 2");
-            for (Future<MaxProjection> _mp : thread_pool.invokeAll(jobs)) {
+            for (Future<MaxProjection> _mp : threadService.getExecutorService().invokeAll(jobs)) {
                 final MaxProjection mp = _mp.get();
                 log.info("Done with max. projection: " + mp.mp_title);
                 writer.println(String.format("%s;;(%.6f, %.6f)", mp.mp_title, mp.pos_x, mp.pos_y));
@@ -147,8 +146,8 @@ public class StitchTileScan implements Command {
             writer.close();
 
             IJ.run("Grid/Collection stitching",
-                    String.format("type=[Positions from file] " + "order=[Defined by TileConfiguration] " + "directory=%s "
-                            + "layout_file=%s " + "fusion_method=[Linear Blending] "
+                    String.format("type=[Positions from file] " + "order=[Defined by TileConfiguration] " + "directory=[%s] "
+                            + "layout_file=[%s] " + "fusion_method=[Linear Blending] "
                             + "regression_threshold=0.30 " + "max/avg_displacement_threshold=2.50 "
                             + "absolute_displacement_threshold=3.50 " + "add_tiles_as_rois " + "ignore_z_stage "
                             + "subpixel_accuracy " + "computation_parameters=[Save computation time (but use more RAM)] "
@@ -173,9 +172,11 @@ public class StitchTileScan implements Command {
             final int[] rois_to_remove = Arrays.stream(rm.getRoisAsArray())
                     .filter(roi -> unknown.matcher(roi.getName()).matches())
                     .mapToInt(roi -> rm.getRoiIndex(roi)).toArray();
-            rm.setSelectedIndexes(rois_to_remove);
-            rm.runCommand("Delete");
-            rm.runCommand("Select All");
+            if (rois_to_remove.length > 0) {
+                rm.setSelectedIndexes(rois_to_remove);
+                rm.runCommand("Delete");
+                rm.runCommand("Select All");
+            }
 
             log.debug("Saving ROIset");
             final String _save_path = image_file.getParent() + File.separator + image_file.base_name + "_" + series_name;
