@@ -139,8 +139,8 @@ function export_stack(image)
     for i = 1:channels
         export_filename = strcat(inputname(1), '_ch_', int2str(i), '.tif');
         imwrite(image{i}(:, :, 1), export_filename, 'Compression', 'lzw');
-    end
-    for j = 2:stack
-        imwrite(image{i}(:, :, j), export_filename, 'WriteMode', 'append', 'Compression', 'lzw');
+        for j = 2:stack
+            imwrite(image{i}(:, :, j), export_filename, 'WriteMode', 'append', 'Compression', 'lzw');
+        end
     end
 end
