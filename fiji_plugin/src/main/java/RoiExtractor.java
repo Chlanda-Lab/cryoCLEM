@@ -12,6 +12,7 @@ import org.scijava.log.LogLevel;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.thread.ThreadService;
 import util.ImageFile;
 import util.ZStack;
 
@@ -27,7 +28,8 @@ import java.util.regex.Pattern;
 
 @Plugin(type = Command.class, menuPath = "Plugins>CryoCLEM>Get ZStacks from Stitch")
 public class RoiExtractor implements Command {
-    private final ExecutorService thread_pool = Executors.newWorkStealingPool();
+    @Parameter
+    private ThreadService thread_pool;
     private final ExecutorService read_pool = Executors.newFixedThreadPool(1);
     private final ExecutorService write_pool = Executors.newFixedThreadPool(1);
 
@@ -129,7 +131,7 @@ public class RoiExtractor implements Command {
                                                               final int series_index = Integer.parseInt(matcher.group(0));
                                                               final int roi_index = rm.getRoiIndex(roi) + 1;
                                                               log.info(String.format("Queued extraction of ROI %d", roi_index));
-                                                              thread_pool.submit(() -> {
+                                                              thread_pool.run(() -> {
                                                               try {
                                                                   final File base_path = new File(
                                                                           output_dir.getPath() + File.separator +
@@ -138,19 +140,21 @@ public class RoiExtractor implements Command {
                                                                   // If the file doesn't exist, check if the parent directory exists. If not, create it. If that fails, don't do anything
                                                                   if (new File(base_path.getParent()).isDirectory() || new File(base_path.getParent()).mkdirs()) {
                                                                       final Future<ZStack> future_zstack = read_pool.submit(() -> {
-                                                                          log.info("Now reading ROI " + roi_index);
+                                                                          log.debug("Now reading ROI " + roi_index);
                                                                           return new ZStack(image_file.series.get(series_index), false);
                                                                       });
                                                                       ZStack zstack = future_zstack.get();
                                                                       write_pool.submit(() -> {
-                                                                          log.info("Now writing ROI " + roi_index);
+                                                                          log.debug("Now writing ROI " + roi_index);
                                                                           ImagePlus[] channels = ChannelSplitter.split(zstack.imp);
                                                                           for (int c = 0; c < channels.length; c++) {
                                                                               final File path = new File(base_path.getPath() + "_channel_" + c + ".tif");
                                                                               if (path.exists() || !new FileSaver(channels[c]).saveAsTiff(path.getPath())) {
                                                                                   log.error(String.format("Error saving to " + path.getPath()));
                                                                               }
+
                                                                           }
+                                                                          log.info("Done writing ROI " + roi_index);
                                                                       });
                                                                   }
                                                               } catch (ExecutionException e) {
