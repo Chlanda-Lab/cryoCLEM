@@ -21,8 +21,10 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.text.Normalizer;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,6 +66,9 @@ public class RoiExtractor implements Command {
         // Replacing _stitched.tif with _ROIset.zip should get us the ROIset filename
         File f = new File(stitched.replace("_stitch.tif", "_ROIset.zip"));
         if (f.isFile()) this.roi_file = f;
+        // Autofill output directory: default name is zstacks
+        this.output_dir = new File(this.stitched_file.getParent() + File.separator + "zstacks");
+
     }
 
     private void original_file_changed() {
@@ -75,6 +80,8 @@ public class RoiExtractor implements Command {
         // Autofill stitched file if only one stitched file is present
         File[] stitch_files = list_files_regex(new File(this.original_file.getParent()), basename + "_.*_stitch\\.png");
         if (stitch_files.length == 1) this.stitched_file = stitch_files[0];
+        // Autofill output directory: default name is zstacks
+        this.output_dir = new File(this.original_file.getParent() + File.separator + "zstacks");
     }
 
     private File[] list_files_regex(File dir, String regex) {
@@ -107,7 +114,7 @@ public class RoiExtractor implements Command {
         rm.runCommand("Show All with labels");
         final ImageFile image_file;
         try {
-             image_file = new ImageFile(this.original_file.getPath(), false);
+            image_file = new ImageFile(this.original_file.getPath(), false);
         } catch (DependencyException | ServiceException | IOException | FormatException e) {
             log.error(e.getMessage());
             return;
@@ -119,9 +126,9 @@ public class RoiExtractor implements Command {
                                                   public void mouseClicked(MouseEvent mouseEvent) {
                                                       final Roi[] rois = rm.getSelectedRoisAsArray();
                                                       /* Fix for issue #1:
-                                                      * If you click anywhere but a ROI number, no ROI is selected.
-                                                      * Then, getSelectedRoisAsArray() returns all ROIs, and all
-                                                      * ROIs would then be exported. We don't want that.
+                                                       * If you click anywhere but a ROI number, no ROI is selected.
+                                                       * Then, getSelectedRoisAsArray() returns all ROIs, and all
+                                                       * ROIs would then be exported. We don't want that.
                                                        */
                                                       if (rois != null && rois.length != 1)
                                                           return;
@@ -131,14 +138,12 @@ public class RoiExtractor implements Command {
                                                               final int series_index = Integer.parseInt(matcher.group(0));
                                                               final int roi_index = rm.getRoiIndex(roi) + 1;
                                                               log.info(String.format("Queued extraction of ROI %d", roi_index));
-                                                              thread_pool.run(() -> {
-                                                              try {
-                                                                  final File base_path = new File(
-                                                                          output_dir.getPath() + File.separator +
-                                                                          image_file.base_name + "_zstack_" + roi_index + File.separator +
-                                                                          image_file.base_name + "_zstack_" + roi_index);
-                                                                  // If the file doesn't exist, check if the parent directory exists. If not, create it. If that fails, don't do anything
-                                                                  if (new File(base_path.getParent()).isDirectory() || new File(base_path.getParent()).mkdirs()) {
+                                                              thread_pool.getExecutorService().submit(() -> {
+                                                                  try {
+                                                                      final File base_path = new File(
+                                                                              output_dir.getPath() + File.separator +
+                                                                                      //image_file.base_name + "_zstack_" + roi_index + File.separator +
+                                                                                      image_file.base_name + "_zstack_" + roi_index);
                                                                       final Future<ZStack> future_zstack = read_pool.submit(() -> {
                                                                           log.debug("Now reading ROI " + roi_index);
                                                                           return new ZStack(image_file.series.get(series_index), false);
@@ -156,14 +161,14 @@ public class RoiExtractor implements Command {
                                                                           }
                                                                           log.info("Done writing ROI " + roi_index);
                                                                       });
+
+                                                                  } catch (ExecutionException e) {
+                                                                      log.error(e.getMessage());
+                                                                      return;
+                                                                  } catch (InterruptedException e) {
+                                                                      log.error("Reading/writing was interrupted!\n" + e.getMessage());
+                                                                      return;
                                                                   }
-                                                              } catch (ExecutionException e) {
-                                                                  log.error(e.getMessage());
-                                                                  return;
-                                                              } catch (InterruptedException e) {
-                                                                  log.error("Reading/writing was interrupted!\n" + e.getMessage());
-                                                                  return;
-                                                              }
                                                               });
                                                           }
                                                       }
@@ -172,12 +177,15 @@ public class RoiExtractor implements Command {
                                                   @Override
                                                   public void mousePressed(MouseEvent mouseEvent) {
                                                   }
+
                                                   @Override
                                                   public void mouseReleased(MouseEvent mouseEvent) {
                                                   }
+
                                                   @Override
                                                   public void mouseEntered(MouseEvent mouseEvent) {
                                                   }
+
                                                   @Override
                                                   public void mouseExited(MouseEvent mouseEvent) {
                                                   }
