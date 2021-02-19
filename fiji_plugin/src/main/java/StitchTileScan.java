@@ -140,7 +140,7 @@ public class StitchTileScan implements Command {
             writer.println("dim = 2");
             for (Future<MaxProjection> _mp : threadService.getExecutorService().invokeAll(jobs)) {
                 final MaxProjection mp = _mp.get();
-                log.info("Done with max. projection: " + mp.mp_title);
+                log.debug("Done with max. projection: " + mp.mp_title);
                 writer.println(String.format("%s;;(%.6f, %.6f)", mp.mp_title, mp.pos_x, mp.pos_y));
             }
             writer.close();
