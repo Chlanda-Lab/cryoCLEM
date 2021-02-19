@@ -98,6 +98,7 @@ public class RoiExtractor implements Command {
     @Override
     public void run() {
         log.setLevel(LogLevel.INFO);
+        thread_pool.setExecutorService(Executors.newFixedThreadPool(2));
 
         log.debug("Creating output dir");
         if (!output_dir.exists()) {
@@ -125,13 +126,8 @@ public class RoiExtractor implements Command {
                                                   @Override
                                                   public void mouseClicked(MouseEvent mouseEvent) {
                                                       final Roi[] rois = rm.getSelectedRoisAsArray();
-                                                      /* Fix for issue #1:
-                                                       * If you click anywhere but a ROI number, no ROI is selected.
-                                                       * Then, getSelectedRoisAsArray() returns all ROIs, and all
-                                                       * ROIs would then be exported. We don't want that.
-                                                       */
-                                                      if (rois != null && rois.length != 1)
-                                                          return;
+                                                      if (rois != null && rois.length != 1) return;
+
                                                       for (Roi roi : rois) {
                                                           Matcher matcher = series_num_regex.matcher(roi.getName());
                                                           if (matcher.find()) {
@@ -139,35 +135,23 @@ public class RoiExtractor implements Command {
                                                               final int roi_index = rm.getRoiIndex(roi) + 1;
                                                               log.info(String.format("Queued extraction of ROI %d", roi_index));
                                                               thread_pool.getExecutorService().submit(() -> {
+                                                                  final File base_path = new File(
+                                                                          output_dir.getPath() + File.separator +
+                                                                                  //image_file.base_name + "_zstack_" + roi_index + File.separator +
+                                                                                  image_file.base_name + "_zstack_" + roi_index);
                                                                   try {
-                                                                      final File base_path = new File(
-                                                                              output_dir.getPath() + File.separator +
-                                                                                      //image_file.base_name + "_zstack_" + roi_index + File.separator +
-                                                                                      image_file.base_name + "_zstack_" + roi_index);
-                                                                      final Future<ZStack> future_zstack = read_pool.submit(() -> {
-                                                                          log.debug("Now reading ROI " + roi_index);
-                                                                          return new ZStack(image_file.series.get(series_index), false);
-                                                                      });
-                                                                      ZStack zstack = future_zstack.get();
-                                                                      write_pool.submit(() -> {
-                                                                          log.debug("Now writing ROI " + roi_index);
-                                                                          ImagePlus[] channels = ChannelSplitter.split(zstack.imp);
-                                                                          for (int c = 0; c < channels.length; c++) {
-                                                                              final File path = new File(base_path.getPath() + "_channel_" + c + ".tif");
-                                                                              if (path.exists() || !new FileSaver(channels[c]).saveAsTiff(path.getPath())) {
-                                                                                  log.error(String.format("Error saving to " + path.getPath()));
-                                                                              }
-
+                                                                      ZStack zstack = new ZStack(image_file.series.get(series_index), true);
+                                                                      ImagePlus[] channels = ChannelSplitter.split(zstack.imp);
+                                                                      for (int c = 0; c < channels.length; c++) {
+                                                                          final File path = new File(base_path.getPath() + "_channel_" + c + ".tif");
+                                                                          if (path.exists() || !new FileSaver(channels[c]).saveAsTiff(path.getPath())) {
+                                                                              log.error(String.format("Error saving to " + path.getPath()));
                                                                           }
-                                                                          log.info("Done writing ROI " + roi_index);
-                                                                      });
 
-                                                                  } catch (ExecutionException e) {
-                                                                      log.error(e.getMessage());
-                                                                      return;
-                                                                  } catch (InterruptedException e) {
-                                                                      log.error("Reading/writing was interrupted!\n" + e.getMessage());
-                                                                      return;
+                                                                      }
+                                                                      log.info("Done writing ROI " + roi_index);
+                                                                  } catch (Exception e) {
+                                                                      log.error(e.toString());
                                                                   }
                                                               });
                                                           }
