@@ -1,7 +1,11 @@
 # Post-correlation cryo-CLEM toolbox
 
 This repository contains utilities to help with the on-lamella post-correlation cryo-CLEM workflow developed in the Chlanda Lab at Heidelberg University.
-For more information, see [our paper](https://doi.org/10.1101/2020.02.27.966739).
+For more information, see the following publications:
+
+[Cryo-correlative light and electron microscopy workflow for cryo-focused ion beam milled adherent cells](https://doi.org/10.1016/bs.mcb.2020.12.009)
+[Post-correlation on-lamella cryo-CLEM reveals the membrane architecture of lamellar bodies](https://doi.org/10.1038/s42003-020-01567-z)
+
 
 ## FIJI plugin
 The FIJI plugin helps with handling the Z-stack tile scan acquired on the Leica cryo-CLEM wide-field microscope.
