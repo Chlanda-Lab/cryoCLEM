@@ -4,6 +4,7 @@ This repository contains utilities to help with the on-lamella post-correlation 
 For more information, see the following publications:
 
 [Cryo-correlative light and electron microscopy workflow for cryo-focused ion beam milled adherent cells](https://doi.org/10.1016/bs.mcb.2020.12.009)
+
 [Post-correlation on-lamella cryo-CLEM reveals the membrane architecture of lamellar bodies](https://doi.org/10.1038/s42003-020-01567-z)
 
 
