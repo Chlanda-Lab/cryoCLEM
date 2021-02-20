@@ -7,6 +7,9 @@ For more information, see the following publications:
 
 [Post-correlation on-lamella cryo-CLEM reveals the membrane architecture of lamellar bodies](https://doi.org/10.1038/s42003-020-01567-z)
 
+## Download
+
+To download the latest version, please see the [Releases](https://github.com/Chlanda-Lab/cryoCLEM/releases) page
 
 ## FIJI plugin
 The FIJI plugin helps with handling the Z-stack tile scan acquired on the Leica cryo-CLEM wide-field microscope.
