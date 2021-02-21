@@ -11,6 +11,12 @@ For more information, see the following publications:
 
 To download the latest version, please see the [Releases](https://github.com/Chlanda-Lab/cryoCLEM/releases) page
 
+## Installation
+
+To install the FIJI plugin, copy the file 'cryoCLEM-1.0.2.jar' to the FIJI plugin folder (FIJI/plugins). After sucessful installation, the plugin can be be found in the FIJI submenu "Plugins - CryoCLEM".
+
+The Matlab script 'Align_cLM_Stack.m' does not need to be installed. It can be directly be loaded and run in Matlab.
+
 ## FIJI plugin
 The FIJI plugin helps with handling the Z-stack tile scan acquired on the Leica cryo-CLEM wide-field microscope.
 The files are usually large (>100 GB) and therefore cannot be opened with FIJI or other image processing software.
