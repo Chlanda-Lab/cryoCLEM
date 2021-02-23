@@ -13,7 +13,8 @@ To download the latest version, please see the [Releases](https://github.com/Chl
 
 ## Installation
 
-To install the FIJI plugin, copy the file 'cryoCLEM-1.0.2.jar' to the FIJI plugin folder (FIJI/plugins). After sucessful installation, the plugin can be be found in the FIJI submenu "Plugins - CryoCLEM".
+To install the FIJI plugin, copy the file 'cryoCLEM-1.0.2.jar' to the FIJI plugin folder (FIJI/plugins). Make sure to delete any older versions of the plugin.
+After sucessful installation, the plugin can be be found in the FIJI submenu "Plugins - CryoCLEM".
 
 The Matlab script 'Align_cLM_Stack.m' does not need to be installed. It can be directly loaded and run in Matlab.
 
