@@ -149,7 +149,7 @@ public class StitchTileScan implements Command {
                     String.format("type=[Positions from file] " + "order=[Defined by TileConfiguration] " + "directory=[%s] "
                             + "layout_file=[%s] " + "fusion_method=[Linear Blending] "
                             + "regression_threshold=0.30 " + "max/avg_displacement_threshold=2.50 "
-                            + "absolute_displacement_threshold=3.50 " + "add_tiles_as_rois " + "ignore_z_stage "
+                            + "absolute_displacement_threshold=3.50 " + "add_tiles_as_rois " + "compute_overlap "
                             + "subpixel_accuracy " + "computation_parameters=[Save computation time (but use more RAM)] "
                             + "image_output=[Fuse and display]", this.max_projection_dir, tileconfig.getName()));
 
