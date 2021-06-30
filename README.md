@@ -22,13 +22,13 @@ The Matlab script 'Align_cLM_Stack.m' does not need to be installed. It can be d
 The FIJI plugin helps with handling the Z-stack tile scan acquired on the Leica cryo-CLEM wide-field microscope.
 The files are usually large (>100 GB) and therefore cannot be opened with FIJI or other image processing software.
 
-The StitchTileScan command runs a maximum projection on a tilescan and stitches it to one image.
+The "Stitch Tile Scan" command runs a maximum projection on a tilescan and stitches it to one image.
 This is useful for targeted cryo-FIB milling, as the image (exported as a PNG file) can be overlaid with an EM map of the grid using MAPS (ThermoFisher).
 
-The ROIExtractor command allows you to easily extract single Z-stacks from the previously stitched map.
-You just need the original tile scan, the ROIset file and the stitched image (both are created by the StitchTileScan command) and and output directory.
+The "Get ZStacks from stitch" command allows you to easily extract single Z-stacks from the previously stitched map.
+You just need the original tile scan, the ROIset file and the stitched image (both are created by the "Stitch Tile Scan" command) and an output directory.
 The stitched image will be opened and overlaid with the positions of the individual tiles.
-Whenever you click into a tile, the corresponding Z-stack will be extracted from the original tile scan and written into the output directory as a .tif.
+Whenever you click the number of a tile (slection tool need to be enabled), the corresponding Z-stack will be extracted from the original tile scan and written into the output directory as a .tif.
 These are subsequently used for deconvolution and correlation with the matlab script.
 
 ## Matlab script
