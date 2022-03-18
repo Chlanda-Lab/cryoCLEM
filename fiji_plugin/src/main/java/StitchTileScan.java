@@ -85,7 +85,7 @@ public class StitchTileScan implements Command {
                 } catch (ExecutionException e) {
                     log.error(String.format("One job has failed!\nFile = [%s]\nutil.Series = [%s]\n", stitch.image_file.base_name, stitch.series_name));
                     for (StackTraceElement el : e.getStackTrace()) {
-                        log.error(String.format("$s:%s:%d", el.getClassName(), el.getMethodName(), el.getLineNumber()));
+                        log.error(String.format("%s:%s:%d", el.getClassName(), el.getMethodName(), el.getLineNumber()));
                     }
                 } catch (InterruptedException e) {
                     log.error("Interrupted\n" + e.getMessage());
