@@ -42,6 +42,8 @@ public class StitchTileScan implements Command {
     private File[] files;
     @Parameter(label = "Create subfolder(s)")
     private boolean subfolder;
+    @Parameter(label = "Use cross-correlation")
+    private boolean use_cross_correlation;
     @Parameter(label = "Write PNG export(s)")
     private boolean png_export;
 
@@ -149,7 +151,7 @@ public class StitchTileScan implements Command {
                     String.format("type=[Positions from file] " + "order=[Defined by TileConfiguration] " + "directory=[%s] "
                             + "layout_file=[%s] " + "fusion_method=[Linear Blending] "
                             + "regression_threshold=0.30 " + "max/avg_displacement_threshold=2.50 "
-                            + "absolute_displacement_threshold=3.50 " + "add_tiles_as_rois " + "compute_overlap "
+                            + "absolute_displacement_threshold=3.50 " + "add_tiles_as_rois " + (use_cross_correlation ? "compute_overlap " : "ignore_z_stage ")
                             + "subpixel_accuracy " + "computation_parameters=[Save computation time (but use more RAM)] "
                             + "image_output=[Fuse and display]", this.max_projection_dir, tileconfig.getName()));
 
