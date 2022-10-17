@@ -46,6 +46,10 @@ public class StitchTileScan implements Command {
     private boolean use_cross_correlation;
     @Parameter(label = "Write PNG export(s)")
     private boolean png_export;
+    @Parameter(label = "Invert X coordinate")
+    private boolean invert_x;
+    @Parameter(label = "Invert Y coordinate")
+    private boolean invert_y;
 
     @Override
     public void run() {
@@ -146,12 +150,19 @@ public class StitchTileScan implements Command {
                 writer.println(String.format("%s;;(%.6f, %.6f)", mp.mp_title, mp.pos_x, mp.pos_y));
             }
             writer.close();
-
+            String invert_xy = "";
+            if (invert_x) {
+                invert_xy = "invert_x ";
+            }
+            if (invert_y) {
+                invert_xy += "invert_y ";
+            }
             IJ.run("Grid/Collection stitching",
                     String.format("type=[Positions from file] " + "order=[Defined by TileConfiguration] " + "directory=[%s] "
                             + "layout_file=[%s] " + "fusion_method=[Linear Blending] "
                             + "regression_threshold=0.30 " + "max/avg_displacement_threshold=2.50 "
                             + "absolute_displacement_threshold=3.50 " + "add_tiles_as_rois " + (use_cross_correlation ? "compute_overlap " : "ignore_z_stage ")
+                            + invert_xy
                             + "subpixel_accuracy " + "computation_parameters=[Save computation time (but use more RAM)] "
                             + "image_output=[Fuse and display]", this.max_projection_dir, tileconfig.getName()));
 
