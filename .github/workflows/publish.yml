@@ -1,0 +1,35 @@
+name: Publish package
+on:
+  push:
+    tags: ['v*']
+
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+          server-id: github
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+      - name: Check tag matches pom version
+        working-directory: fiji_plugin
+        run: |
+          POM_VERSION=$(mvn -B -q help:evaluate -Dexpression=project.version -DforceStdout)
+          if [ "v$POM_VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match pom version $POM_VERSION"; exit 1
+          fi
+      - name: Publish
+        run: mvn -B -X deploy 2>&1 | grep -iE "422|message|errors" | head -30
+        working-directory: fiji_plugin
+        env:
+          MAVEN_USERNAME: ${{ github.actor }}
+          MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}

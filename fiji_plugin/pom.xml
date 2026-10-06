@@ -12,8 +12,8 @@
     </parent>
 
     <groupId>de.chlandalab</groupId>
-    <artifactId>cryoCLEM</artifactId>
-    <version>1.0.5</version>
+    <artifactId>cryoclem</artifactId>
+    <version>1.0.6</version>
 
     <name>CryoCLEM image stitching and other utilities</name>
     <description>A helper plugin for CryoCLEM workflows</description>
@@ -57,6 +57,14 @@
     <ciManagement>
         <system>None</system>
     </ciManagement>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/Chlanda-Lab/cryoCLEM</url>
+        </repository>
+    </distributionManagement>
+
 
     <properties>
         <package-name>de.chlandalab.cryoCLEM.plugin</package-name>
