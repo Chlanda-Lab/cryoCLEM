@@ -138,7 +138,7 @@ public class RoiExtractor implements Command {
                                                                   final File base_path = new File(
                                                                           output_dir.getPath() + File.separator +
                                                                                   //image_file.base_name + "_zstack_" + roi_index + File.separator +
-                                                                                  image_file.base_name + "_zstack_" + roi_index);
+                                                                                  image_file.base_name + "_zstack_" + series_index);
                                                                   try {
                                                                       ZStack zstack = new ZStack(image_file.series.get(series_index), true);
                                                                       ImagePlus[] channels = ChannelSplitter.split(zstack.imp);
