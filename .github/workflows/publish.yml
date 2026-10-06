@@ -8,7 +8,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - uses: actions/checkout@v4
@@ -28,8 +28,13 @@ jobs:
             echo "Tag $GITHUB_REF_NAME does not match pom version $POM_VERSION"; exit 1
           fi
       - name: Publish
-        run: mvn -B -X deploy 2>&1 | grep -iE "422|message|errors" | head -30
+        run: mvn -B deploy
         working-directory: fiji_plugin
         env:
           MAVEN_USERNAME: ${{ github.actor }}
           MAVEN_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: fiji_plugin/target/cryoclem-*.jar
+          generate_release_notes: true
