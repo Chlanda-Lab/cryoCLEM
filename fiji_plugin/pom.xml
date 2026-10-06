@@ -13,7 +13,7 @@
 
     <groupId>de.chlandalab</groupId>
     <artifactId>cryoclem</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
 
     <name>CryoCLEM image stitching and other utilities</name>
     <description>A helper plugin for CryoCLEM workflows</description>
