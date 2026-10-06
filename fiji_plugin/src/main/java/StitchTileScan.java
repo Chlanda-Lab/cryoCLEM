@@ -2,18 +2,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.io.FileSaver;
-import ij.plugin.ZProjector;
 import ij.plugin.frame.RoiManager;
 import ij.process.ImageConverter;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
-import loci.common.services.ServiceFactory;
-import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
-import loci.formats.IFormatReader;
-import loci.formats.meta.IMetadata;
-import loci.formats.meta.MetadataRetrieve;
-import loci.formats.services.OMEXMLService;
 import org.scijava.command.Command;
 import org.scijava.log.LogLevel;
 import org.scijava.log.LogService;
@@ -25,8 +18,8 @@ import util.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -147,7 +140,7 @@ public class StitchTileScan implements Command {
             for (Future<MaxProjection> _mp : threadService.getExecutorService().invokeAll(jobs)) {
                 final MaxProjection mp = _mp.get();
                 log.debug("Done with max. projection: " + mp.mp_title);
-                writer.println(String.format("%s;;(%.6f, %.6f)", mp.mp_title, mp.pos_x, mp.pos_y));
+                writer.println(String.format(Locale.US, "%s;;(%.6f, %.6f)",mp.mp_title, mp.pos_x, mp.pos_y));
             }
             writer.close();
             String invert_xy = "";
